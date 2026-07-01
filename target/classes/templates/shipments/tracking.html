@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Track Shipment')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title">Live Shipment Tracking</h1></div>
+            <div class="page-actions">
+                <a th:href="@{/shipments/track}" class="btn btn-outline-secondary"><i class="bi bi-search me-1"></i>Track Another</a>
+                <a th:href="@{/shipments/{id}(id=${shipment.id})}" class="btn btn-outline-secondary"><i class="bi bi-card-list me-1"></i>Full Details</a>
+            </div>
+        </div>
+
+        <!-- Hero summary -->
+        <div class="tracking-hero">
+            <div class="tracking-hero-top">
+                <div>
+                    <div class="tracking-number-label">Tracking Number</div>
+                    <div class="tracking-number-value" th:text="${shipment.trackingNumber}">SHP-0000</div>
+                    <div style="margin-top:8px;">
+                        <span class="badge-status status-shipped" th:text="${#strings.replace(shipment.status.name(), '_', ' ')}">Status</span>
+                        <span th:if="${shipment.vehiclePlate}" style="margin-left:10px; font-size:13px; color:rgba(255,255,255,0.8);">
+                            <i class="bi bi-truck-front me-1"></i><span th:text="${shipment.vehiclePlate}">Vehicle</span>
+                            <span th:if="${shipment.driverName}" th:text="'· ' + ${shipment.driverName}"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="tracking-eta-badge">
+                    <div class="eta-label">Estimated Delivery</div>
+                    <div class="eta-value" th:text="${shipment.estimatedDelivery ?: 'TBD'}">--</div>
+                </div>
+            </div>
+
+            <div class="tracking-route-line">
+                <div class="tracking-route-point">
+                    <span class="pt-label">From</span>
+                    <span class="pt-value" th:text="${shipment.originAddress}">Origin</span>
+                </div>
+                <div class="tracking-route-track">
+                    <div class="tracking-route-progress" th:id="'routeProgress'" style="width:35%;"></div>
+                    <div class="tracking-route-truck" style="left:35%;"><i class="bi bi-truck"></i></div>
+                </div>
+                <div class="tracking-route-point end">
+                    <span class="pt-label">To</span>
+                    <span class="pt-value" th:text="${shipment.destinationAddress}">Destination</span>
+                </div>
+            </div>
+
+            <!-- Status stepper -->
+            <ul class="status-stepper" id="statusStepper">
+                <div class="step-fill" id="stepFill" style="width:0%;"></div>
+                <li id="step-PENDING"><div class="step-dot"><i class="bi bi-receipt"></i></div>Order Placed</li>
+                <li id="step-PICKED_UP"><div class="step-dot"><i class="bi bi-box-seam"></i></div>Picked Up</li>
+                <li id="step-IN_TRANSIT"><div class="step-dot"><i class="bi bi-truck"></i></div>In Transit</li>
+                <li id="step-OUT_FOR_DELIVERY"><div class="step-dot"><i class="bi bi-geo-alt"></i></div>Out for Delivery</li>
+                <li id="step-DELIVERED"><div class="step-dot"><i class="bi bi-check-circle"></i></div>Delivered</li>
+            </ul>
+        </div>
+
+        <div class="row g-4">
+            <!-- Map -->
+            <div class="col-12 col-lg-8">
+                <div class="map-card">
+                    <div id="trackingMap" class="tracking-map"></div>
+                    <div class="map-legend">
+                        <span><span class="legend-dot" style="background:var(--info);"></span>Origin</span>
+                        <span><span class="legend-dot" style="background:var(--primary);"></span>Current / Last Known Location</span>
+                        <span><span class="legend-dot" style="background:var(--danger);"></span>Destination</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="col-12 col-lg-4">
+                <div class="card-panel" style="height:100%;">
+                    <div class="panel-header"><h3 class="panel-title">Tracking History</h3></div>
+                    <div class="tracking-timeline" style="max-height:460px; overflow-y:auto;">
+                        <div th:each="event : ${trackingEvents}" class="tracking-event">
+                            <div class="tracking-dot"></div>
+                            <div class="tracking-content">
+                                <div class="d-flex justify-content-between">
+                                    <strong th:text="${#strings.replace(event.status.name(), '_', ' ')}">Status</strong>
+                                    <small class="text-muted" th:text="${#temporals.format(event.timestamp, 'MMM dd, HH:mm')}">Time</small>
+                                </div>
+                                <p class="text-muted mb-0" th:text="${event.location}">Location</p>
+                                <small class="text-muted" th:text="${event.description}">Description</small>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(trackingEvents)}" class="text-center text-muted py-4">
+                            <i class="bi bi-clock-history" style="font-size:28px;"></i>
+                            <p class="mt-2 mb-0">No tracking events recorded yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+const shipmentStatus = /*[[${shipment.status.name()}]]*/ 'PENDING';
+const trackingEvents = /*[[${trackingPoints}]]*/ [];
+const originAddress = /*[[${shipment.originAddress}]]*/ '';
+const destAddress = /*[[${shipment.destinationAddress}]]*/ '';
+/*]]>*/
+
+// ---- Status stepper ----
+(function() {
+    const order = ['PENDING', 'PICKED_UP', 'IN_TRANSIT', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+    const idx = Math.max(order.indexOf(shipmentStatus), 0);
+    const failed = ['FAILED', 'RETURNED', 'CANCELLED'].includes(shipmentStatus);
+    order.forEach((s, i) => {
+        const li = document.getElementById('step-' + s);
+        if (!li) return;
+        if (i < idx || (i === idx && !failed)) li.classList.add(i === idx ? 'current' : 'done');
+    });
+    const fillPct = failed ? 100 : (idx / (order.length - 1)) * 100;
+    document.getElementById('stepFill').style.width = fillPct + '%';
+})();
+
+// ---- Map setup ----
+(function() {
+    const points = (trackingEvents || [])
+        .filter(e => e.latitude != null && e.longitude != null)
+        .map(e => ({ lat: parseFloat(e.latitude), lng: parseFloat(e.longitude), status: e.status, location: e.location, timestamp: e.timestamp }))
+        .reverse(); // oldest -> newest for the route line
+
+    const mapEl = document.getElementById('trackingMap');
+    const defaultCenter = [20.5937, 78.9629]; // fallback center
+    const map = L.map(mapEl).setView(defaultCenter, 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const truckIcon = L.divIcon({ className: '', html: '<div class="leaflet-marker-truck"><i class="bi bi-truck"></i></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+    const originIcon = L.divIcon({ className: '', html: '<div class="leaflet-marker-origin"></div>', iconSize: [16, 16], iconAnchor: [8, 16] });
+    const destIcon = L.divIcon({ className: '', html: '<div class="leaflet-marker-dest"></div>', iconSize: [16, 16], iconAnchor: [8, 16] });
+
+    const bounds = [];
+
+    if (points.length > 0) {
+        // Route polyline
+        const latlngs = points.map(p => [p.lat, p.lng]);
+        L.polyline(latlngs, { color: '#0EA5E9', weight: 4, opacity: 0.85, dashArray: '1,8', lineCap: 'round' }).addTo(map);
+
+        // Origin marker (first point)
+        const first = points[0];
+        L.marker([first.lat, first.lng], { icon: originIcon }).addTo(map)
+            .bindPopup('<strong>Origin</strong><br>' + (first.location || originAddress));
+        bounds.push([first.lat, first.lng]);
+
+        // Current location marker (last point)
+        const last = points[points.length - 1];
+        L.marker([last.lat, last.lng], { icon: truckIcon }).addTo(map)
+            .bindPopup('<strong>Last Known Location</strong><br>' + (last.location || '') + '<br><small>' + (last.status || '') + '</small>')
+            .openPopup();
+        bounds.push([last.lat, last.lng]);
+
+        // Intermediate stop markers
+        points.slice(1, -1).forEach(p => {
+            L.circleMarker([p.lat, p.lng], { radius: 5, color: '#0EA5E9', fillColor: '#0EA5E9', fillOpacity: 0.9 }).addTo(map)
+                .bindPopup((p.status || '').replace(/_/g, ' ') + '<br>' + (p.location || ''));
+            bounds.push([p.lat, p.lng]);
+        });
+
+        map.fitBounds(bounds, { padding: [40, 40] });
+    } else {
+        mapEl.insertAdjacentHTML('beforeend',
+            '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.85); z-index:1000; flex-direction:column; gap:8px; color:#64748B;">' +
+            '<i class="bi bi-geo" style="font-size:32px;"></i><span>No GPS coordinates recorded yet for this shipment.</span></div>');
+    }
+})();
+</script>
+</body>
+</html>

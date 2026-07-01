@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body class="layout-wrapper">
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+
+    <div class="page-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Real-time supply chain overview &mdash; <span id="liveTime"></span></p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i>Print
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="refreshDashboard()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible d-flex" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- KPI Cards Row 1 -->
+        <div class="row g-4 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-primary">
+                    <div class="kpi-icon"><i class="bi bi-cart3"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Total Orders</span>
+                        <span class="kpi-value counter" th:data-target="${stats.totalOrders}" th:text="${stats.totalOrders}">0</span>
+                        <span class="kpi-change positive"><i class="bi bi-arrow-up-short"></i>+12.5%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-warning">
+                    <div class="kpi-icon"><i class="bi bi-clock-history"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Pending Orders</span>
+                        <span class="kpi-value counter" th:data-target="${stats.pendingOrders}" th:text="${stats.pendingOrders}">0</span>
+                        <span class="kpi-change neutral"><i class="bi bi-dash"></i>Awaiting</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-success">
+                    <div class="kpi-icon"><i class="bi bi-truck"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Active Shipments</span>
+                        <span class="kpi-value counter" th:data-target="${stats.activeShipments}" th:text="${stats.activeShipments}">0</span>
+                        <span class="kpi-change positive"><i class="bi bi-arrow-up-short"></i>In transit</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-danger">
+                    <div class="kpi-icon"><i class="bi bi-exclamation-triangle"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Delayed Deliveries</span>
+                        <span class="kpi-value counter" th:data-target="${stats.delayedDeliveries}" th:text="${stats.delayedDeliveries}">0</span>
+                        <span class="kpi-change negative"><i class="bi bi-arrow-up-short"></i>Needs attention</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards Row 2 -->
+        <div class="row g-4 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-info">
+                    <div class="kpi-icon"><i class="bi bi-house-gear"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Active Warehouses</span>
+                        <span class="kpi-value counter" th:data-target="${stats.totalWarehouses}" th:text="${stats.totalWarehouses}">0</span>
+                        <span class="kpi-change neutral">Operational</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon"><i class="bi bi-currency-dollar"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Inventory Value</span>
+                        <span class="kpi-value" th:text="'$' + ${#numbers.formatDecimal(stats.inventoryValue, 1, 'COMMA', 0, 'POINT')}">$0</span>
+                        <span class="kpi-change positive"><i class="bi bi-arrow-up-short"></i>+8.3%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-teal">
+                    <div class="kpi-icon"><i class="bi bi-cash-stack"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Total Revenue</span>
+                        <span class="kpi-value" th:text="'$' + ${#numbers.formatDecimal(stats.totalRevenue, 1, 'COMMA', 0, 'POINT')}">$0</span>
+                        <span class="kpi-change positive"><i class="bi bi-arrow-up-short"></i>+23.1%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-orange">
+                    <div class="kpi-icon"><i class="bi bi-truck-front"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Active Vehicles</span>
+                        <span class="kpi-value counter" th:data-target="${stats.activeVehicles}" th:text="${stats.activeVehicles}">0</span>
+                        <span class="kpi-change neutral">On route</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-8">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">Revenue Analytics</h3>
+                            <p class="panel-subtitle">Monthly revenue vs cost comparison</p>
+                        </div>
+                        <div class="panel-actions">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary active">12M</button>
+                                <button class="btn btn-outline-secondary">6M</button>
+                                <button class="btn btn-outline-secondary">3M</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="revenueChart" style="height:300px;"></div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="card-panel h-100">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">Warehouse Utilization</h3>
+                            <p class="panel-subtitle">Current capacity usage</p>
+                        </div>
+                    </div>
+                    <div id="warehouseChart" style="height:300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">Shipment Trends</h3>
+                            <p class="panel-subtitle">Shipped vs delivered monthly</p>
+                        </div>
+                    </div>
+                    <div id="shipmentChart" style="height:260px;"></div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">Quick Actions</h3>
+                            <p class="panel-subtitle">Common operations</p>
+                        </div>
+                    </div>
+                    <div class="quick-actions-grid">
+                        <a th:href="@{/orders/new}" class="quick-action-btn">
+                            <i class="bi bi-cart-plus"></i>
+                            <span>New Order</span>
+                        </a>
+                        <a th:href="@{/shipments/new}" class="quick-action-btn">
+                            <i class="bi bi-truck"></i>
+                            <span>New Shipment</span>
+                        </a>
+                        <a th:href="@{/products/new}" class="quick-action-btn">
+                            <i class="bi bi-plus-square"></i>
+                            <span>Add Product</span>
+                        </a>
+                        <a th:href="@{/customers/new}" class="quick-action-btn">
+                            <i class="bi bi-person-plus"></i>
+                            <span>Add Customer</span>
+                        </a>
+                        <a th:href="@{/suppliers/new}" class="quick-action-btn">
+                            <i class="bi bi-building-add"></i>
+                            <span>Add Supplier</span>
+                        </a>
+                        <a th:href="@{/reports}" class="quick-action-btn">
+                            <i class="bi bi-file-earmark-bar-graph"></i>
+                            <span>View Reports</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-xl-7">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">Recent Orders</h3>
+                            <p class="panel-subtitle">Latest customer orders</p>
+                        </div>
+                        <a th:href="@{/orders}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${recentOrders}">
+                                    <td><code th:text="${order.orderNumber}">ORD-001</code></td>
+                                    <td th:text="${order.customer}">Customer</td>
+                                    <td th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                                    <td>
+                                        <span class="badge-status"
+                                              th:classappend="${order.status == 'PENDING'} ? 'status-pending' :
+                                                              (${order.status == 'DELIVERED'} ? 'status-delivered' :
+                                                              (${order.status == 'SHIPPED'} ? 'status-shipped' :
+                                                              (${order.status == 'PROCESSING'} ? 'status-processing' : 'status-default')))"
+                                              th:text="${order.status}">Status</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(recentOrders)}">
+                                    <td colspan="4" class="text-center text-muted py-4">No orders yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-5">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">Low Stock Alert</h3>
+                            <p class="panel-subtitle">Products below reorder point</p>
+                        </div>
+                        <a th:href="@{/inventory}" class="btn btn-sm btn-outline-danger">View All</a>
+                    </div>
+                    <div th:each="item : ${lowStockProducts}" class="low-stock-item">
+                        <div class="low-stock-info">
+                            <span class="low-stock-name" th:text="${item.product}">Product</span>
+                            <span class="low-stock-sku" th:text="${item.sku}">SKU</span>
+                        </div>
+                        <div class="low-stock-qty">
+                            <span class="qty-badge" th:text="${item.quantity} + '/' + ${item.reorderPoint}">0/10</span>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(lowStockProducts)}" class="text-center text-muted py-4">
+                        <i class="bi bi-check-circle text-success d-block fs-2 mb-2"></i>
+                        All stock levels are healthy
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Shipments -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title">Recent Shipments</h3>
+                            <p class="panel-subtitle">Latest shipment status</p>
+                        </div>
+                        <a th:href="@{/shipments}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Tracking #</th>
+                                    <th>Destination</th>
+                                    <th>Est. Delivery</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="ship : ${recentShipments}">
+                                    <td><code th:text="${ship.trackingNumber}">SHP-001</code></td>
+                                    <td th:text="${ship.destination}">Destination</td>
+                                    <td th:text="${ship.estimatedDelivery}">Date</td>
+                                    <td>
+                                        <span class="badge-status"
+                                              th:classappend="${ship.status == 'DELIVERED'} ? 'status-delivered' :
+                                                              (${ship.status == 'IN_TRANSIT'} ? 'status-shipped' :
+                                                              (${ship.status == 'PENDING'} ? 'status-pending' : 'status-default'))"
+                                              th:text="${#strings.replace(ship.status, '_', ' ')}">Status</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/shipments/{id}(id=${ship.trackingNumber})}" class="btn btn-xs btn-outline-secondary">Track</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(recentShipments)}">
+                                    <td colspan="5" class="text-center text-muted py-4">No shipments yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- /page-content -->
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <span>&copy; 2024 Smart Logistics SCM &mdash; Enterprise Edition</span>
+        <span>v1.0.0</span>
+    </footer>
+</div><!-- /main-content -->
+
+<!-- Floating Action Button -->
+<div class="fab-container">
+    <button class="btn fab-btn" data-bs-toggle="tooltip" title="Quick Add">
+        <i class="bi bi-plus-lg"></i>
+    </button>
+    <div class="fab-menu">
+        <a th:href="@{/orders/new}" class="fab-item" data-bs-toggle="tooltip" title="New Order">
+            <i class="bi bi-cart-plus"></i>
+        </a>
+        <a th:href="@{/shipments/new}" class="fab-item" data-bs-toggle="tooltip" title="New Shipment">
+            <i class="bi bi-truck"></i>
+        </a>
+        <a th:href="@{/products/new}" class="fab-item" data-bs-toggle="tooltip" title="New Product">
+            <i class="bi bi-box-seam"></i>
+        </a>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script th:inline="javascript">
+const revenueData = /*[[${revenueChartData}]]*/ [];
+const shipmentData = /*[[${shipmentChartData}]]*/ [];
+const warehouseData = /*[[${warehouseUtil}]]*/ [];
+</script>
+
+<script>
+// Live time
+function updateTime() {
+    document.getElementById('liveTime').textContent = new Date().toLocaleString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+updateTime(); setInterval(updateTime, 60000);
+
+function refreshDashboard() { window.location.reload(); }
+
+// Revenue Chart
+(function() {
+    const months12 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const rev12 = months12.map((_,i) => 120000 + Math.floor(Math.random()*180000));
+    const cost12 = months12.map((_,i) => 80000 + Math.floor(Math.random()*100000));
+
+    const months6 = ['Jul','Aug','Sep','Oct','Nov','Dec'];
+    const rev6 = rev12.slice(6);
+    const cost6 = cost12.slice(6);
+
+    const months3 = ['Oct','Nov','Dec'];
+    const rev3 = rev12.slice(9);
+    const cost3 = cost12.slice(9);
+
+    const chart = new ApexCharts(document.getElementById('revenueChart'), {
+        chart: { type: 'area', height: 300, toolbar: { show: false }, animations: { enabled: true } },
+        series: [
+            { name: 'Revenue', data: rev12 },
+            { name: 'Cost', data: cost12 }
+        ],
+        colors: ['#4F46E5', '#10B981'],
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
+        stroke: { curve: 'smooth', width: 2 },
+        xaxis: { categories: months12 },
+        yaxis: { labels: { formatter: v => '$' + (v/1000).toFixed(0) + 'K' } },
+        tooltip: { y: { formatter: v => '$' + v.toLocaleString() } },
+        grid: { strokeDashArray: 4 },
+        legend: { position: 'top' }
+    });
+    chart.render();
+
+    // Event listeners for period buttons
+    const buttons = document.querySelectorAll('.panel-actions .btn-group button');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            buttons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            if (this.textContent.trim() === '12M') {
+                chart.updateOptions({
+                    xaxis: { categories: months12 }
+                });
+                chart.updateSeries([
+                    { name: 'Revenue', data: rev12 },
+                    { name: 'Cost', data: cost12 }
+                ]);
+            } else if (this.textContent.trim() === '6M') {
+                chart.updateOptions({
+                    xaxis: { categories: months6 }
+                });
+                chart.updateSeries([
+                    { name: 'Revenue', data: rev6 },
+                    { name: 'Cost', data: cost6 }
+                ]);
+            } else if (this.textContent.trim() === '3M') {
+                chart.updateOptions({
+                    xaxis: { categories: months3 }
+                });
+                chart.updateSeries([
+                    { name: 'Revenue', data: rev3 },
+                    { name: 'Cost', data: cost3 }
+                ]);
+            }
+        });
+    });
+})();
+
+// Warehouse utilization chart
+(function() {
+    const warehouseNames = ['Main DC', 'East Coast Hub', 'Midwest Facility'];
+    const utilization = [64, 51, 35];
+    new ApexCharts(document.getElementById('warehouseChart'), {
+        chart: { type: 'radialBar', height: 300 },
+        series: utilization,
+        labels: warehouseNames,
+        colors: ['#4F46E5', '#10B981', '#F59E0B'],
+        plotOptions: {
+            radialBar: {
+                dataLabels: { name: { fontSize: '11px' }, value: { fontSize: '14px', formatter: v => v + '%' } },
+                hollow: { size: '20%' }
+            }
+        },
+        legend: { show: true, position: 'bottom', fontSize: '11px' }
+    }).render();
+})();
+
+// Shipment Chart
+(function() {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    new ApexCharts(document.getElementById('shipmentChart'), {
+        chart: { type: 'bar', height: 260, toolbar: { show: false } },
+        series: [
+            { name: 'Shipped', data: months.map(() => 100 + Math.floor(Math.random()*400)) },
+            { name: 'Delivered', data: months.map(() => 80 + Math.floor(Math.random()*350)) }
+        ],
+        colors: ['#6366F1', '#10B981'],
+        xaxis: { categories: months },
+        plotOptions: { bar: { columnWidth: '55%', borderRadius: 4 } },
+        grid: { strokeDashArray: 4 },
+        legend: { position: 'top' }
+    }).render();
+})();
+</script>
+</body>
+</html>

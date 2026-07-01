@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Order Form')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title" th:text="${pageTitle}">Order</h1></div>
+            <a th:href="@{/orders}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+        </div>
+        <div class="card-panel">
+            <form th:action="@{/orders/save}" method="post" th:object="${order}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" th:field="*{id}"/>
+
+                <div class="form-section">
+                    <h5 class="form-section-title"><i class="bi bi-cart me-2"></i>Order Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label required">Customer</label>
+                            <select th:field="*{customerId}" class="form-select">
+                                <option value="">Select customer</option>
+                                <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name}">Customer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Warehouse</label>
+                            <select th:field="*{warehouseId}" class="form-select">
+                                <option value="">Select warehouse</option>
+                                <option th:each="w : ${warehouses}" th:value="${w.id}" th:text="${w.name}">Warehouse</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Shipping Method</label>
+                            <select th:field="*{shippingMethod}" class="form-select">
+                                <option value="">Select method</option>
+                                <option value="Express Freight">Express Freight</option>
+                                <option value="Standard Freight">Standard Freight</option>
+                                <option value="Standard Ground">Standard Ground</option>
+                                <option value="Air Freight">Air Freight</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Order Status</label>
+                            <select th:field="*{status}" class="form-select">
+                                <option th:each="s : ${orderStatuses}" th:value="${s}" th:text="${#strings.replace(s.name(), '_', ' ')}">Status</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Payment Status</label>
+                            <select th:field="*{paymentStatus}" class="form-select">
+                                <option th:each="s : ${paymentStatuses}" th:value="${s}" th:text="${s}">Status</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Expected Delivery</label>
+                            <input type="date" th:field="*{expectedDeliveryDate}" class="form-control"/>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Shipping Address</label>
+                            <input type="text" th:field="*{shippingAddress}" class="form-control" placeholder="Full shipping address"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h5 class="form-section-title"><i class="bi bi-currency-dollar me-2"></i>Financials</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Shipping Cost ($)</label>
+                            <input type="number" th:field="*{shippingCost}" class="form-control" step="0.01" min="0" placeholder="0.00"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tax Amount ($)</label>
+                            <input type="number" th:field="*{taxAmount}" class="form-control" step="0.01" min="0" placeholder="0.00"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Discount ($)</label>
+                            <input type="number" th:field="*{discountAmount}" class="form-control" step="0.01" min="0" placeholder="0.00"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <textarea th:field="*{notes}" class="form-control" rows="2" placeholder="Order notes..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/orders}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Save Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

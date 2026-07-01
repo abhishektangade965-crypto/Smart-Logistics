@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Shipment Form')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title" th:text="${pageTitle}">Shipment Form</h1></div>
+            <a th:href="@{/shipments}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-9">
+                <div class="card-panel">
+                    <form th:action="@{/shipments/save}" method="post" th:object="${shipment}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" th:field="*{id}"/>
+                        <div class="form-section">
+                            <h5 class="form-section-title"><i class="bi bi-truck me-2"></i>Shipment Details</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Order</label>
+                                    <select th:field="*{orderId}" class="form-select">
+                                        <option value="">Select order</option>
+                                        <option th:each="o : ${orders}" th:value="${o.id}" th:text="${o.orderNumber}">Order</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Vehicle</label>
+                                    <select th:field="*{vehicleId}" class="form-select">
+                                        <option value="">Select vehicle</option>
+                                        <option th:each="v : ${vehicles}" th:value="${v.id}" th:text="${v.licensePlate} + ' - ' + ${v.make}">Vehicle</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Route</label>
+                                    <select th:field="*{routeId}" class="form-select">
+                                        <option value="">Select route</option>
+                                        <option th:each="r : ${routes}" th:value="${r.id}" th:text="${r.name}">Route</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Status</label>
+                                    <select th:field="*{status}" class="form-select">
+                                        <option th:each="s : ${shipmentStatuses}" th:value="${s}" th:text="${#strings.replace(s.name(), '_', ' ')}">Status</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Driver Name</label>
+                                    <input type="text" th:field="*{driverName}" class="form-control" placeholder="Driver name"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Driver Phone</label>
+                                    <input type="text" th:field="*{driverPhone}" class="form-control" placeholder="+1-555-0000"/>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Origin Address</label>
+                                    <input type="text" th:field="*{originAddress}" class="form-control" placeholder="Origin address"/>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Destination Address</label>
+                                    <input type="text" th:field="*{destinationAddress}" class="form-control" placeholder="Destination address"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Scheduled Date</label>
+                                    <input type="date" th:field="*{scheduledDate}" class="form-control"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Estimated Delivery</label>
+                                    <input type="date" th:field="*{estimatedDelivery}" class="form-control"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Weight (kg)</label>
+                                    <input type="number" th:field="*{weight}" class="form-control" step="0.01" min="0" placeholder="0.00"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Shipping Cost ($)</label>
+                                    <input type="number" th:field="*{shippingCost}" class="form-control" step="0.01" min="0" placeholder="0.00"/>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Notes</label>
+                                    <textarea th:field="*{notes}" class="form-control" rows="2" placeholder="Notes..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <a th:href="@{/shipments}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Save Shipment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

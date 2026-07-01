@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Track Shipment')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Track Shipment</h1>
+                <p class="page-subtitle">Enter a tracking number to see its live route on the map</p>
+            </div>
+        </div>
+
+        <div class="tracking-hero">
+            <div class="tracking-hero-top" style="width:100%; flex-direction:column; align-items:center; text-align:center;">
+                <i class="bi bi-truck" style="font-size:42px; opacity:0.85;"></i>
+                <h2 style="margin:12px 0 4px; font-weight:800;">Where's my shipment?</h2>
+                <p style="color:rgba(255,255,255,0.75); margin-bottom:18px;">Real-time tracking across our entire delivery network</p>
+                <form id="trackForm" class="track-search-box" th:attr="data-base=@{/shipments/track/}" onsubmit="return submitTrack(event)">
+                    <input type="text" id="trackingInput" class="form-control form-control-lg" placeholder="e.g. SHP-2024-00123" required/>
+                    <button type="submit" class="btn btn-lg btn-light fw-bold"><i class="bi bi-search me-1"></i>Track</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card-panel">
+                    <div class="panel-header"><h3 class="panel-title">All Shipments</h3></div>
+                    <p class="text-muted mb-3">Or pick a shipment below to view it on the map.</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead><tr><th>Tracking #</th><th>Status</th><th>Origin</th><th>Destination</th><th></th></tr></thead>
+                            <tbody>
+                            <tr th:each="s : ${shipments}">
+                                <td><code th:text="${s.trackingNumber}">TRK</code></td>
+                                <td><span class="badge-status status-shipped" th:text="${#strings.replace(s.status.name(), '_', ' ')}">Status</span></td>
+                                <td th:text="${s.originAddress}">Origin</td>
+                                <td th:text="${s.destinationAddress}">Dest</td>
+                                <td><a th:href="@{/shipments/track/{tn}(tn=${s.trackingNumber})}" class="btn btn-xs btn-outline-info"><i class="bi bi-geo-alt me-1"></i>Track</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+function submitTrack(e) {
+    e.preventDefault();
+    const v = document.getElementById('trackingInput').value.trim();
+    const base = document.getElementById('trackForm').getAttribute('data-base');
+    if (v) window.location.href = base + encodeURIComponent(v);
+    return false;
+}
+</script>
+</body>
+</html>

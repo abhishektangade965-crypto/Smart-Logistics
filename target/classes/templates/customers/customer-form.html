@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Customer Form')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title" th:text="${pageTitle}">Customer</h1></div>
+            <a th:href="@{/customers}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-9">
+                <div class="card-panel">
+                    <form th:action="@{/customers/save}" method="post" th:object="${customer}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" th:field="*{id}"/>
+                        <div class="form-section">
+                            <h5 class="form-section-title"><i class="bi bi-person me-2"></i>Customer Information</h5>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label required">Customer Name</label>
+                                    <input type="text" th:field="*{name}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" placeholder="Customer name"/>
+                                    <div class="invalid-feedback" th:errors="*{name}"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Code</label>
+                                    <input type="text" th:field="*{code}" class="form-control" placeholder="CUS-001"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" th:field="*{email}" class="form-control" placeholder="customer@company.com"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" th:field="*{phone}" class="form-control" placeholder="+1-555-0000"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Contact Person</label>
+                                    <input type="text" th:field="*{contactPerson}" class="form-control" placeholder="Contact name"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Customer Type</label>
+                                    <select th:field="*{customerType}" class="form-select">
+                                        <option th:each="t : ${customerTypes}" th:value="${t}" th:text="${t}">Type</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Status</label>
+                                    <select th:field="*{status}" class="form-select">
+                                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Credit Limit ($)</label>
+                                    <input type="number" th:field="*{creditLimit}" class="form-control" step="0.01" min="0" placeholder="0.00"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h5 class="form-section-title"><i class="bi bi-geo-alt me-2"></i>Addresses</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Billing Address</label>
+                                    <textarea th:field="*{billingAddress}" class="form-control" rows="3" placeholder="Billing address"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Shipping Address</label>
+                                    <textarea th:field="*{shippingAddress}" class="form-control" rows="3" placeholder="Shipping address"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">City</label>
+                                    <input type="text" th:field="*{city}" class="form-control" placeholder="City"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">State</label>
+                                    <input type="text" th:field="*{state}" class="form-control" placeholder="State"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Country</label>
+                                    <input type="text" th:field="*{country}" class="form-control" placeholder="Country"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <a th:href="@{/customers}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Save Customer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

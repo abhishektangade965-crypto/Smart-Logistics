@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Supplier Form')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title" th:text="${pageTitle}">Supplier Form</h1>
+                <p class="page-subtitle">Fill in the supplier details below</p>
+            </div>
+            <a th:href="@{/suppliers}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-9">
+                <div class="card-panel">
+                    <form th:action="@{/suppliers/save}" method="post" th:object="${supplier}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" th:field="*{id}"/>
+
+                        <div class="form-section">
+                            <h5 class="form-section-title"><i class="bi bi-building me-2"></i>Company Information</h5>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label required">Company Name</label>
+                                    <input type="text" th:field="*{name}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                           placeholder="Enter company name"/>
+                                    <div class="invalid-feedback" th:errors="*{name}"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Supplier Code</label>
+                                    <input type="text" th:field="*{code}" class="form-control" placeholder="e.g., SUP-001"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" th:field="*{email}" class="form-control" placeholder="contact@company.com"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" th:field="*{phone}" class="form-control" placeholder="+1-555-0000"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Contact Person</label>
+                                    <input type="text" th:field="*{contactPerson}" class="form-control" placeholder="Contact name"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Website</label>
+                                    <input type="text" th:field="*{website}" class="form-control" placeholder="https://company.com"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Status</label>
+                                    <select th:field="*{status}" class="form-select">
+                                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h5 class="form-section-title"><i class="bi bi-geo-alt me-2"></i>Address</h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Street Address</label>
+                                    <input type="text" th:field="*{address}" class="form-control" placeholder="Street address"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">City</label>
+                                    <input type="text" th:field="*{city}" class="form-control" placeholder="City"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Country</label>
+                                    <input type="text" th:field="*{country}" class="form-control" placeholder="Country"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h5 class="form-section-title"><i class="bi bi-chat-text me-2"></i>Notes</h5>
+                            <textarea th:field="*{notes}" class="form-control" rows="3" placeholder="Additional notes..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <a th:href="@{/suppliers}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check2 me-1"></i>Save Supplier
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

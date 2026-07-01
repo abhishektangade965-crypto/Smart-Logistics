@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Supplier Details')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title" th:text="${supplier.name}">Supplier</h1><p class="page-subtitle">Supplier details</p></div>
+            <div class="page-actions">
+                <a th:href="@{/suppliers}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+                <a th:href="@{/suppliers/{id}/edit(id=${supplier.id})}" class="btn btn-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="entity-avatar" style="width:52px;height:52px;font-size:20px;" th:text="${#strings.substring(supplier.name,0,1)}">S</div>
+                            <div>
+                                <h3 class="mb-0" th:text="${supplier.name}">Name</h3>
+                                <code th:text="${supplier.code}">Code</code>
+                            </div>
+                        </div>
+                        <span class="badge-status"
+                              th:classappend="${supplier.status.name() == 'ACTIVE'} ? 'status-delivered' : 'status-default'"
+                              th:text="${supplier.status}">Status</span>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value" th:text="${supplier.email ?: '-'}">email</span></div>
+                        <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value" th:text="${supplier.phone ?: '-'}">phone</span></div>
+                        <div class="detail-row"><span class="detail-label">Contact Person</span><span class="detail-value" th:text="${supplier.contactPerson ?: '-'}">person</span></div>
+                        <div class="detail-row"><span class="detail-label">Website</span><span class="detail-value"><a th:href="${supplier.website}" target="_blank" th:text="${supplier.website ?: '-'}">site</a></span></div>
+                        <div class="detail-row"><span class="detail-label">Address</span><span class="detail-value" th:text="${supplier.address ?: '-'}">address</span></div>
+                        <div class="detail-row"><span class="detail-label">City / Country</span><span class="detail-value" th:text="${supplier.city} + ', ' + ${supplier.country}">City</span></div>
+                        <div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value" th:text="${supplier.notes ?: '-'}">notes</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Shipments')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title">Shipments</h1><p class="page-subtitle">Track and manage shipments</p></div>
+            <a th:href="@{/shipments/new}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New Shipment</a>
+        </div>
+        <div th:if="${success}" class="alert alert-success alert-dismissible d-flex" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div class="card-panel">
+            <div class="table-responsive">
+                <table id="shipmentsTable" class="table table-hover align-middle">
+                    <thead>
+                        <tr><th>Tracking #</th><th>Order</th><th>Vehicle</th><th>Route</th><th>Est. Delivery</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="s : ${shipments}">
+                            <td><a th:href="@{/shipments/{id}(id=${s.id})}" class="fw-600 link-primary" th:text="${s.trackingNumber}">TRK</a></td>
+                            <td th:text="${s.orderNumber ?: '-'}">Order</td>
+                            <td th:text="${s.vehiclePlate ?: '-'}">Vehicle</td>
+                            <td th:text="${s.routeName ?: '-'}">Route</td>
+                            <td th:text="${s.estimatedDelivery}">Date</td>
+                            <td>
+                                <span class="badge-status"
+                                      th:classappend="${s.status.name() == 'DELIVERED'} ? 'status-delivered' :
+                                                      (${s.status.name() == 'IN_TRANSIT'} ? 'status-shipped' :
+                                                      (${s.status.name() == 'PENDING'} ? 'status-pending' :
+                                                      (${s.status.name() == 'OUT_FOR_DELIVERY'} ? 'status-processing' : 'status-default')))"
+                                      th:text="${#strings.replace(s.status.name(), '_', ' ')}">Status</span>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <a th:href="@{/shipments/{id}(id=${s.id})}" class="btn btn-xs btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                                    <a th:href="@{/shipments/track/{tn}(tn=${s.trackingNumber})}" class="btn btn-xs btn-outline-info" title="Track on map"><i class="bi bi-geo-alt"></i></a>
+                                    <a th:href="@{/shipments/{id}/edit(id=${s.id})}" class="btn btn-xs btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <form th:action="@{/shipments/{id}/delete(id=${s.id})}" method="post" class="d-inline" onsubmit="return confirmDelete(this, 'shipment')">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-xs btn-outline-danger"><i class="bi bi-trash3"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>$(document).ready(function() { $('#shipmentsTable').DataTable({ pageLength: 15 }); });</script>
+</body>
+</html>

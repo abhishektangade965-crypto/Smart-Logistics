@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Shipment Details')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title" th:text="'Shipment ' + ${shipment.trackingNumber}">Shipment</h1></div>
+            <div class="page-actions">
+                <a th:href="@{/shipments/track/{tn}(tn=${shipment.trackingNumber})}" class="btn btn-info text-white"><i class="bi bi-geo-alt me-1"></i>Track on Map</a>
+                <a th:href="@{/shipments}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">Shipment Information</h3>
+                        <span class="badge-status status-shipped" th:text="${#strings.replace(shipment.status.name(), '_', ' ')}">Status</span>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-row"><span class="detail-label">Tracking Number</span><span class="detail-value"><code th:text="${shipment.trackingNumber}">TRK</code></span></div>
+                        <div class="detail-row"><span class="detail-label">Order</span><span class="detail-value" th:text="${shipment.orderNumber ?: 'N/A'}">Order</span></div>
+                        <div class="detail-row"><span class="detail-label">Vehicle</span><span class="detail-value" th:text="${shipment.vehiclePlate ?: 'N/A'}">Vehicle</span></div>
+                        <div class="detail-row"><span class="detail-label">Route</span><span class="detail-value" th:text="${shipment.routeName ?: 'N/A'}">Route</span></div>
+                        <div class="detail-row"><span class="detail-label">Driver</span><span class="detail-value" th:text="${shipment.driverName ?: 'N/A'}">Driver</span></div>
+                        <div class="detail-row"><span class="detail-label">Origin</span><span class="detail-value" th:text="${shipment.originAddress}">Origin</span></div>
+                        <div class="detail-row"><span class="detail-label">Destination</span><span class="detail-value" th:text="${shipment.destinationAddress}">Dest</span></div>
+                        <div class="detail-row"><span class="detail-label">Est. Delivery</span><span class="detail-value" th:text="${shipment.estimatedDelivery}">Date</span></div>
+                        <div class="detail-row"><span class="detail-label">Shipping Cost</span><span class="detail-value" th:text="'$' + ${#numbers.formatDecimal(shipment.shippingCost, 1, 2)}">$0.00</span></div>
+                    </div>
+                </div>
+
+                <!-- Tracking Timeline -->
+                <div class="card-panel mt-4">
+                    <div class="panel-header"><h3 class="panel-title">Tracking History</h3></div>
+                    <div class="tracking-timeline">
+                        <div th:each="event : ${trackingEvents}" class="tracking-event">
+                            <div class="tracking-dot"></div>
+                            <div class="tracking-content">
+                                <div class="d-flex justify-content-between">
+                                    <strong th:text="${#strings.replace(event.status.name(), '_', ' ')}">Status</strong>
+                                    <small class="text-muted" th:text="${event.timestamp}">Time</small>
+                                </div>
+                                <p class="text-muted mb-0" th:text="${event.location}">Location</p>
+                                <small class="text-muted" th:text="${event.description}">Description</small>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(trackingEvents)}" class="text-center text-muted py-4">
+                            No tracking events recorded yet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini map widget -->
+            <div class="col-12 col-lg-4">
+                <div class="map-card">
+                    <div class="panel-header" style="padding:14px 16px 0;"><h3 class="panel-title">Current Location</h3></div>
+                    <div id="miniMap" class="tracking-map-mini" style="margin:10px 12px 0; width:calc(100% - 24px);"></div>
+                    <div class="p-3">
+                        <a th:href="@{/shipments/track/{tn}(tn=${shipment.trackingNumber})}" class="btn btn-sm btn-primary w-100">
+                            <i class="bi bi-arrows-fullscreen me-1"></i>View Full Tracking Map
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script th:inline="javascript">
+/*<![CDATA[*/
+const miniEvents = /*[[${trackingPoints}]]*/ [];
+/*]]>*/
+(function() {
+    const pts = (miniEvents || []).filter(e => e.latitude != null && e.longitude != null)
+        .map(e => [parseFloat(e.latitude), parseFloat(e.longitude)]);
+    const el = document.getElementById('miniMap');
+    if (!el) return;
+    const map = L.map(el, { zoomControl: false, attributionControl: false }).setView(pts.length ? pts[pts.length - 1] : [20.5937, 78.9629], pts.length ? 11 : 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+    if (pts.length) {
+        const truckIcon = L.divIcon({ className: '', html: '<div class="leaflet-marker-truck" style="width:26px;height:26px;font-size:12px;"><i class="bi bi-truck"></i></div>', iconSize: [26, 26], iconAnchor: [13, 13] });
+        L.marker(pts[pts.length - 1], { icon: truckIcon }).addTo(map);
+        if (pts.length > 1) L.polyline(pts, { color: '#0EA5E9', weight: 3 }).addTo(map);
+    } else {
+        el.insertAdjacentHTML('beforeend', '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.85); color:#94A3B8; font-size:12px;">No GPS data yet</div>');
+        el.style.position = 'relative';
+    }
+})();
+</script>
+</body>
+</html>

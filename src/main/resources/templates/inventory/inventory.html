@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Inventory')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title">Inventory</h1><p class="page-subtitle">Monitor stock levels across warehouses</p></div>
+            <a th:href="@{/inventory/movements}" class="btn btn-outline-primary"><i class="bi bi-arrow-left-right me-1"></i>Stock Movements</a>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-primary">
+                    <div class="kpi-icon"><i class="bi bi-boxes"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Total Items</span>
+                        <span class="kpi-value" th:text="${stats['totalItems']}">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-danger">
+                    <div class="kpi-icon"><i class="bi bi-exclamation-triangle"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Low Stock</span>
+                        <span class="kpi-value" th:text="${stats['lowStockCount']}">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon"><i class="bi bi-currency-dollar"></i></div>
+                    <div class="kpi-content">
+                        <span class="kpi-label">Total Value</span>
+                        <span class="kpi-value" th:text="'$' + ${#numbers.formatDecimal(stats['totalValue'], 1, 'COMMA', 0, 'POINT')}">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        <div class="card-panel mb-4" th:if="${not #lists.isEmpty(lowStockList)}">
+            <div class="panel-header">
+                <h3 class="panel-title text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Low Stock Alerts</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Product</th><th>SKU</th><th>Warehouse</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Reorder Point</th></tr></thead>
+                    <tbody>
+                        <tr th:each="inv : ${lowStockList}" class="table-danger">
+                            <td th:text="${inv.product.name}">Product</td>
+                            <td><code th:text="${inv.product.sku}">SKU</code></td>
+                            <td th:text="${inv.warehouse.name}">Warehouse</td>
+                            <td th:text="${inv.quantityOnHand}">0</td>
+                            <td th:text="${inv.quantityReserved}">0</td>
+                            <td class="fw-600 text-danger" th:text="${inv.availableQuantity}">0</td>
+                            <td th:text="${inv.product.reorderPoint}">10</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- All Inventory -->
+        <div class="card-panel">
+            <div class="panel-header"><h3 class="panel-title">All Inventory</h3></div>
+            <div class="table-responsive">
+                <table id="inventoryTable" class="table table-hover align-middle">
+                    <thead>
+                        <tr><th>Product</th><th>SKU</th><th>Warehouse</th><th>Location</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="inv : ${inventoryList}">
+                            <td th:text="${inv.product.name}">Product</td>
+                            <td><code th:text="${inv.product.sku}">SKU</code></td>
+                            <td th:text="${inv.warehouse.name}">Warehouse</td>
+                            <td th:text="${inv.binLocation ?: '-'}">Location</td>
+                            <td th:text="${inv.quantityOnHand}">0</td>
+                            <td th:text="${inv.quantityReserved}">0</td>
+                            <td class="fw-600" th:text="${inv.availableQuantity}">0</td>
+                            <td>
+                                <span class="badge-status"
+                                      th:classappend="${inv.lowStock} ? 'status-danger' : 'status-delivered'"
+                                      th:text="${inv.lowStock} ? 'Low Stock' : 'OK'">Status</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>$(document).ready(function() { $('#inventoryTable').DataTable({ pageLength: 15 }); });</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Settings')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title">Settings</h1><p class="page-subtitle">System configuration and management</p></div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Users -->
+            <div class="col-12">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title"><i class="bi bi-people me-2"></i>User Management</h3>
+                        <a th:href="@{#}" class="btn btn-sm btn-primary"><i class="bi bi-person-plus me-1"></i>Add User</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="usersTable" class="table table-hover align-middle">
+                            <thead><tr><th>Username</th><th>Email</th><th>Full Name</th><th>Department</th><th>Roles</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <tr th:each="u : ${users}">
+                                    <td class="fw-600" th:text="${u.username}">username</td>
+                                    <td th:text="${u.email}">email</td>
+                                    <td th:text="${u.firstName} + ' ' + ${u.lastName}">Name</td>
+                                    <td th:text="${u.department ?: '-'}">Dept</td>
+                                    <td>
+                                        <span th:each="r : ${u.roleNames}"
+                                              class="badge bg-primary me-1"
+                                              th:text="${#strings.replace(r, 'ROLE_', '')}">Role</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge-status"
+                                              th:classappend="${u.enabled} ? 'status-delivered' : 'status-default'"
+                                              th:text="${u.enabled} ? 'Active' : 'Disabled'">Status</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="col-12 col-lg-6">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title"><i class="bi bi-tags me-2"></i>Categories</h3>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <div th:each="c : ${categories}" class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong th:text="${c.name}">Category</strong>
+                                <small class="text-muted ms-2" th:text="${c.code}">Code</small>
+                            </div>
+                            <span class="badge-status" th:classappend="${c.active} ? 'status-delivered' : 'status-default'"
+                                  th:text="${c.active} ? 'Active' : 'Inactive'">Status</span>
+                        </div>
+                        <div th:if="${#lists.isEmpty(categories)}" class="list-group-item text-center text-muted py-3">No categories</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Routes -->
+            <div class="col-12 col-lg-6">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title"><i class="bi bi-map me-2"></i>Routes</h3>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <div th:each="r : ${routes}" class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <strong th:text="${r.name}">Route</strong>
+                                <span class="badge-status" th:classappend="${r.status.name() == 'ACTIVE'} ? 'status-delivered' : 'status-default'"
+                                      th:text="${r.status}">Status</span>
+                            </div>
+                            <small class="text-muted" th:text="${r.origin} + ' → ' + ${r.destination}">Origin → Dest</small>
+                            <small class="text-muted ms-3" th:text="${r.distanceKm} + ' km'">Distance</small>
+                        </div>
+                        <div th:if="${#lists.isEmpty(routes)}" class="list-group-item text-center text-muted py-3">No routes</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="col-12">
+                <div class="card-panel">
+                    <div class="panel-header"><h3 class="panel-title"><i class="bi bi-info-circle me-2"></i>System Information</h3></div>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="info-card">
+                                <span class="info-label">Application</span>
+                                <span class="info-value">Smart Logistics SCM</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-card">
+                                <span class="info-label">Version</span>
+                                <span class="info-value">v1.0.0 Enterprise</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-card">
+                                <span class="info-label">Framework</span>
+                                <span class="info-value">Spring Boot 3.2</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-card">
+                                <span class="info-label">Database</span>
+                                <span class="info-value">H2 (MySQL-compat)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>$(document).ready(function() { $('#usersTable').DataTable({ pageLength: 10 }); });</script>
+</body>
+</html>

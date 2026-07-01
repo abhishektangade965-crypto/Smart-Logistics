@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Product Form')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title" th:text="${pageTitle}">Product Form</h1></div>
+            <a th:href="@{/products}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-9">
+                <div class="card-panel">
+                    <form th:action="@{/products/save}" method="post" th:object="${product}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" th:field="*{id}"/>
+
+                        <div class="form-section">
+                            <h5 class="form-section-title"><i class="bi bi-box-seam me-2"></i>Product Information</h5>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label required">Product Name</label>
+                                    <input type="text" th:field="*{name}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" placeholder="Product name"/>
+                                    <div class="invalid-feedback" th:errors="*{name}"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label required">SKU</label>
+                                    <input type="text" th:field="*{sku}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('sku')} ? 'is-invalid'" placeholder="e.g., PRD-001"/>
+                                    <div class="invalid-feedback" th:errors="*{sku}"></div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Description</label>
+                                    <textarea th:field="*{description}" class="form-control" rows="3" placeholder="Product description"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Category</label>
+                                    <select th:field="*{categoryId}" class="form-select">
+                                        <option value="">Select category</option>
+                                        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}">Cat</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Supplier</label>
+                                    <select th:field="*{supplierId}" class="form-select">
+                                        <option value="">Select supplier</option>
+                                        <option th:each="s : ${suppliers}" th:value="${s.id}" th:text="${s.name}">Sup</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Brand</label>
+                                    <input type="text" th:field="*{brand}" class="form-control" placeholder="Brand name"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h5 class="form-section-title"><i class="bi bi-currency-dollar me-2"></i>Pricing & Inventory</h5>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label required">Unit Price ($)</label>
+                                    <input type="number" th:field="*{unitPrice}" class="form-control" step="0.01" min="0"
+                                           th:classappend="${#fields.hasErrors('unitPrice')} ? 'is-invalid'" placeholder="0.00"/>
+                                    <div class="invalid-feedback" th:errors="*{unitPrice}"></div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Cost Price ($)</label>
+                                    <input type="number" th:field="*{costPrice}" class="form-control" step="0.01" min="0" placeholder="0.00"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Unit</label>
+                                    <input type="text" th:field="*{unit}" class="form-control" placeholder="PCS / KG / BOX"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Status</label>
+                                    <select th:field="*{status}" class="form-select">
+                                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}">Status</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Reorder Point</label>
+                                    <input type="number" th:field="*{reorderPoint}" class="form-control" min="0" placeholder="10"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Reorder Quantity</label>
+                                    <input type="number" th:field="*{reorderQuantity}" class="form-control" min="0" placeholder="50"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Weight (kg)</label>
+                                    <input type="number" th:field="*{weight}" class="form-control" step="0.01" min="0" placeholder="0.00"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Dimensions</label>
+                                    <input type="text" th:field="*{dimensions}" class="form-control" placeholder="L x W x H cm"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a th:href="@{/products}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Save Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

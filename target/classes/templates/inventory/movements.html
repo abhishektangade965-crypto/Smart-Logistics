@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Stock Movements')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <div class="page-header">
+            <div><h1 class="page-title">Stock Movements</h1><p class="page-subtitle">Track all inventory movements</p></div>
+            <a th:href="@{/inventory}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back to Inventory</a>
+        </div>
+        <div class="card-panel">
+            <div class="table-responsive">
+                <table id="movementsTable" class="table table-hover align-middle">
+                    <thead>
+                        <tr><th>Ref #</th><th>Type</th><th>Product</th><th>From</th><th>To</th><th>Quantity</th><th>Reason</th><th>Date</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="m : ${movements}">
+                            <td><code th:text="${m.referenceNumber ?: '-'}">REF</code></td>
+                            <td>
+                                <span class="badge-status"
+                                      th:classappend="${m.movementType.name() == 'INBOUND'} ? 'status-delivered' :
+                                                      (${m.movementType.name() == 'OUTBOUND'} ? 'status-danger' :
+                                                      (${m.movementType.name() == 'TRANSFER'} ? 'status-shipped' : 'status-default'))"
+                                      th:text="${m.movementType}">Type</span>
+                            </td>
+                            <td th:text="${m.product.name}">Product</td>
+                            <td th:text="${m.fromWarehouse != null} ? ${m.fromWarehouse.name} : '-'">From</td>
+                            <td th:text="${m.toWarehouse != null} ? ${m.toWarehouse.name} : '-'">To</td>
+                            <td class="fw-600" th:text="${m.quantity}">0</td>
+                            <td th:text="${m.reason ?: '-'}">Reason</td>
+                            <td th:text="${m.createdAt}">Date</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>$(document).ready(function() { $('#movementsTable').DataTable({ pageLength: 20 }); });</script>
+</body>
+</html>

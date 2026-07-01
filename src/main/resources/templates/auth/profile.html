@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:replace="~{fragments/layout :: head('My Profile')}"></head>
+<body class="layout-wrapper">
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div class="main-content">
+    <div th:replace="~{fragments/layout :: navbar}"></div>
+    <div class="page-content">
+        <!-- Profile Header -->
+        <div class="page-header mb-4">
+            <div>
+                <h1 class="page-title">My Profile</h1>
+                <p class="page-subtitle">Manage your account details and security settings</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Side: User Avatar Card -->
+            <div class="col-lg-4">
+                <div class="card-panel text-center py-5">
+                    <div class="d-flex flex-column align-items-center">
+                        <!-- Avatar -->
+                        <div class="avatar-large mb-3" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #3D1EF5, #7B3FFB); color: white; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 800; box-shadow: 0 10px 25px rgba(61, 30, 245, 0.25);">
+                            <span th:text="${#strings.substring(user.firstName, 0, 1) + #strings.substring(user.lastName, 0, 1)}">A</span>
+                        </div>
+                        <h4 class="fw-bold mb-1 text-slate-900" th:text="${user.firstName + ' ' + user.lastName}">Full Name</h4>
+                        <p class="text-muted small mb-3" th:text="${user.department}">Department</p>
+                        
+                        <div class="d-flex gap-2 mb-4">
+                            <span class="badge bg-primary px-3 py-2" th:each="role : ${user.roleNames}" th:text="${role}">ROLE</span>
+                        </div>
+                    </div>
+                    <hr class="border-light my-4"/>
+                    <div class="text-start px-3">
+                        <div class="d-flex justify-content-between py-2 border-bottom border-light">
+                            <span class="text-muted small">Status</span>
+                            <span class="badge bg-success-subtle text-success px-2 py-1" th:if="${user.enabled}">Active</span>
+                            <span class="badge bg-danger-subtle text-danger px-2 py-1" th:unless="${user.enabled}">Suspended</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom border-light">
+                            <span class="text-muted small">Account ID</span>
+                            <span class="text-slate-700 fw-500" th:text="${'#ACC-' + user.id}">#ACC-001</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-muted small">Last Login</span>
+                            <span class="text-slate-700 fw-500 small" th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}">Just now</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Detailed Details Card -->
+            <div class="col-lg-8">
+                <div class="card-panel">
+                    <h5 class="fw-bold mb-4 text-slate-900"><i class="bi bi-person-lines-fill text-primary me-2"></i>Account Details</h5>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Username</label>
+                            <div class="form-control-plaintext border-bottom border-light fw-600" th:text="${user.username}">username</div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Email Address</label>
+                            <div class="form-control-plaintext border-bottom border-light fw-600" th:text="${user.email}">email@smartlogistics.com</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">First Name</label>
+                            <div class="form-control-plaintext border-bottom border-light fw-600" th:text="${user.firstName}">First</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Last Name</label>
+                            <div class="form-control-plaintext border-bottom border-light fw-600" th:text="${user.lastName}">Last</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Department</label>
+                            <div class="form-control-plaintext border-bottom border-light fw-600" th:text="${user.department}">Department</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Phone Number</label>
+                            <div class="form-control-plaintext border-bottom border-light fw-600" th:text="${user.phone ?: 'Not provided'}">Phone</div>
+                        </div>
+                    </div>
+
+                    <hr class="border-light my-5"/>
+
+                    <h5 class="fw-bold mb-4 text-slate-900"><i class="bi bi-shield-lock-fill text-primary me-2"></i>Security & Permissions</h5>
+                    
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2 bg-primary-subtle text-primary rounded-3"><i class="bi bi-key-fill" style="font-size: 20px;"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Two-Factor Authentication (2FA)</h6>
+                                <p class="text-muted small mb-0">Add an extra layer of security to your admin account.</p>
+                            </div>
+                            <div class="ms-auto"><button class="btn btn-sm btn-outline-primary">Enable 2FA</button></div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2 bg-primary-subtle text-primary rounded-3"><i class="bi bi-fingerprint" style="font-size: 20px;"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Role Permissions Level</h6>
+                                <p class="text-muted small mb-0">Your account is granted full system write and edit permissions.</p>
+                            </div>
+                            <div class="ms-auto"><span class="badge bg-success-subtle text-success px-3 py-2">Full Access</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="app-footer"><span>&copy; 2024 Smart Logistics SCM</span><span>v1.0.0</span></footer>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
