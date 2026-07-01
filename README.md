@@ -2,6 +2,16 @@
 
 An enterprise-grade, high-performance web application designed to streamline modern logistics, warehouse management, real-time transport tracking, and automated inventory reconciliation. Built on **Spring Boot 3**, **Hibernate**, and **MySQL**, with optional caching via **Redis** and message brokerage via **RabbitMQ**.
 
+## 📷 Visual Preview
+
+| Executive Dashboard | Glassmorphism 2.0 Login |
+| :---: | :---: |
+| ![Dashboard](screenshots/media__1782705725504.png) | ![Login](screenshots/media__1782707975259.png) |
+
+| Global Autocomplete Search | Revenue Analytics Chart |
+| :---: | :---: |
+| ![Search Bar](screenshots/media__1782789072757.png) | ![Revenue Analytics](screenshots/media__1782792861038.png) |
+
 ---
 
 ## 🚀 Key Features
