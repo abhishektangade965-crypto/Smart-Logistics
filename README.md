@@ -2,16 +2,6 @@
 
 An enterprise-grade, high-performance web application designed to streamline modern logistics, warehouse management, real-time transport tracking, and automated inventory reconciliation. Built on **Spring Boot 3**, **Hibernate**, and **MySQL**, with optional caching via **Redis** and message brokerage via **RabbitMQ**.
 
-## 📷 Visual Preview
-
-| Executive Dashboard | Glassmorphism 2.0 Login |
-| :---: | :---: |
-| ![Dashboard](screenshots/media__1782705725504.png) | ![Login](screenshots/media__1782707975259.png) |
-
-| Global Autocomplete Search | Revenue Analytics Chart |
-| :---: | :---: |
-| ![Search Bar](screenshots/media__1782789072757.png) | ![Revenue Analytics](screenshots/media__1782792861038.png) |
-
 ---
 
 ## 🚀 Key Features
@@ -23,6 +13,22 @@ An enterprise-grade, high-performance web application designed to streamline mod
 * **Shipment & Delivery Pipeline**: Real-time tracking progress logs mapping shipments to routes, drivers, and vehicles with instant status propagation.
 * **Admin Profile Console**: Detailed view of the logged-in administrator's profile, roles, assigned departments, and system privileges.
 * **Cloud-Resilient Caching**: Automated Redis bypass using a custom `CacheErrorHandler`. If Redis is offline, the app handles errors gracefully and queries the DB directly.
+
+---
+
+## 📸 Application Interface
+
+### 🔐 Glassmorphism 2.0 Login Portal
+![Glassmorphism Login Portal](docs/images/login-page.png)
+
+### 📊 Executive Analytics Dashboard
+![Executive Analytics Dashboard](docs/images/dashboard-main.png)
+
+### 🚚 Shipment Status & Quick Action Center
+![Shipments & Quick Actions](docs/images/dashboard-shipments.png)
+
+### 📈 Reports & Detailed Metrics Console
+![Reports & Analytics Console](docs/images/reports-analytics.png)
 
 ---
 
